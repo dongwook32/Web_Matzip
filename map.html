@@ -1,28 +1,46 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>맛집 지도 (한식·중식·일식)</title>
   
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Leaflet MarkerCluster CSS (마커 클러스터링) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <!-- Font Awesome (아이콘용) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
   
   <style>
+    /* 기본 레이아웃 */
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-    }
+}
     #map {
       width: 100%;
       height: 100%;
-    }
+}
+    #resetView {
+    background: #fff;
+    border: 2px solid #4caf50;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4caf50;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin-left: 8px; /* 일식 버튼과 간격 */
+    transition: background 0.2s, color 0.2s;
+}
+    #resetView:hover {
+    background: #4caf50;
+    color: #fff;
+}
+    
     /* 카테고리 버튼 (좌측 상단) */
     .btn-container {
       position: absolute;
@@ -33,12 +51,9 @@
       gap: 8px;
     }
     .btn-container button {
-      display: flex;
-      align-items: center;
-      gap: 4px;
       background: #4caf50;
       color: #fff;
-      border: 0;
+      border: none;
       padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
@@ -49,10 +64,11 @@
     .btn-container button:hover {
       background: #45a049;
     }
-    /* 범례 (상단 중앙, 그대로 유지) */
+    
+    /* 범례 (상단 중앙) */
     .legend {
       position: absolute;
-      top: 10px;
+      top: 0px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.9);
@@ -66,11 +82,12 @@
       vertical-align: middle;
       margin-right: 4px;
     }
-    /* 줌 슬라이더 (우측 상단, top:50px) */
+    
+ /* 줌 슬라이더 (우측 상단, top:50px) */
     .zoom-slider-vertical {
       position: absolute;
-      top: 50px;
-      right: 10px;
+      top: 65px;
+      right: 13px;
       z-index: 1000;
       background: rgba(255,255,255,0.9);
       padding: 8px;
@@ -132,9 +149,10 @@
       color: white;
       pointer-events: none;
     }
-    /* 좌측 하단 축척 컨트롤 – 이전 디자인 그대로 */
+    
+    /* 축척 컨트롤 (좌측 하단) - ft와 m 분리 */
     .leaflet-control-scale {
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0,0,0,0.7);
       border: 1px solid #333;
       border-radius: 6px;
       padding: 8px 12px;
@@ -142,7 +160,6 @@
       color: #fff;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       min-width: 100px;
-      /* 아래 추가하여 ft와 m의 칸 분리 */
       display: flex;
       justify-content: space-between;
     }
@@ -154,7 +171,8 @@
       flex: 1;
       text-align: right;
     }
-    /* 즐겨찾기 버튼 (오른쪽 상단, 둥근 네모 안에 별) */
+    
+    /* 즐겨찾기 버튼 (오른쪽 상단, 둥근 네모 내부 별 아이콘) */
     #toggleFavorites {
       position: fixed;
       top: 10px;
@@ -174,6 +192,7 @@
       background: #FFEB3B;
       color: #fff;
     }
+    
     /* 즐겨찾기 패널 (우측 사이드바) */
     #favorites-panel {
       position: fixed;
@@ -217,17 +236,59 @@
     .favorite-item button:hover {
       background: #d32f2f;
     }
+    
+    /* 마커 클러스터 아이콘 (크기 확대) */
+    .marker-cluster-small {
+      width: 70px;
+      height: 70px;
+      margin-left: -35px;
+      margin-top: -35px;
+      border: 3px solid rgba(255,255,255,0.5);
+      background-color: rgba(181,226,140,0.9);
+      font-size: 18px;
+    }
+    .marker-cluster-medium {
+      width: 80px;
+      height: 80px;
+      margin-left: -40px;
+      margin-top: -40px;
+      border: 3px solid rgba(255,255,255,0.5);
+      background-color: rgba(241,211,87,0.9);
+      font-size: 20px;
+    }
+    .marker-cluster-large {
+      width: 90px;
+      height: 90px;
+      margin-left: -45px;
+      margin-top: -45px;
+      border: 3px solid rgba(255,255,255,0.5);
+      background-color: rgba(253,156,115,0.9);
+      font-size: 24px;
+    }
+    
+    /* 레이어 컨트롤이 우측 하단에 배치될 때, resetView 버튼과 겹치지 않도록 margin-bottom 추가 */
+    .leaflet-control-layers {
+      margin-bottom: 70px;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  
-  <!-- 카테고리 버튼 (좌측 상단) -->
-  <div class="btn-container">
-    <button id="btn-korean"><i class="fas fa-bowl-rice"></i> 한식</button>
-    <button id="btn-chinese"><i class="fas fa-utensils"></i> 중식</button>
-    <button id="btn-japanese"><i class="fas fa-fish"></i> 일식</button>
+<div class="zoom-slider-vertical">
+  <input type="range" id="zoom-range-v" min="0" max="30" step="5" value="20">
+  <span id="zoom-value-v">20</span>
+  <div class="slider-buttons">
+    <button id="zoom-increase">+</button>
+    <button id="zoom-decrease">-</button>
   </div>
+</div>
+  <!-- 카테고리 버튼 (좌측 상단) -->
+<div class="btn-container">
+  <button id="btn-korean"><i class="fas fa-bowl-rice"></i> 한식</button>
+  <button id="btn-chinese"><i class="fas fa-utensils"></i> 중식</button>
+  <button id="btn-japanese"><i class="fas fa-fish"></i> 일식</button>
+  <button id="resetView" title="초기 위치로"><i class="fas fa-home"></i> 홈 위치</button>
+</div>
   
   <!-- 범례 (상단 중앙) -->
   <div class="legend">
@@ -235,50 +296,40 @@
     <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png" width="16" height="28"> 제휴 업체
   </div>
   
-  <!-- 즐겨찾기 버튼 (오른쪽 상단, 둥근 네모 안에 별 아이콘) -->
+  <!-- 즐겨찾기 버튼 (오른쪽 상단) -->
   <button id="toggleFavorites"><i class="fas fa-star"></i></button>
   
   <!-- 즐겨찾기 패널 (우측 사이드바) -->
   <div id="favorites-panel">
     <h2>즐겨찾기 목록</h2>
     <div id="favorites-list">
-      <!-- 즐겨찾기 아이템들이 여기에 추가됩니다 -->
+      <!-- 즐겨찾기 항목들이 추가됨 -->
     </div>
   </div>
-  
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- Leaflet MarkerCluster JS (마커 클러스터링) -->
+  <!-- Leaflet MarkerCluster JS -->
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  
   <script>
-    /*********************
-     * 전역 변수 설정
-     *********************/
-    var markerClusterGroup = null; // 마커 클러스터링 그룹
+    // 전역 변수 설정
+    var markerClusterGroup = null; // 마커 클러스터 그룹
     var current = [];              // 현재 지도에 표시 중인 마커 배열
     var favorites = [];            // 즐겨찾기 목록 (가게 이름 저장)
     
-    /*********************
-     * 대한민국 경계 (유지)
-     *********************/
+    // 대한민국 경계
     var koreaBounds = [[33.0, 124.0], [39.5, 132.0]];
     
-    /*********************
-     * 지도 스타일 전환 (Feature 6)
-     * 기본 바닥 레이어: OSM Standard("일반 지도") / Esri Satellite("위성 지도")
-     *********************/
-    var osmStandard = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { attribution: "&copy; OpenStreetMap contributors" }
-    );
-    var esriSat = L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { attribution: "Tiles &copy; Esri" }
-    );
+    // 지도 바닥 레이어 (일반, 위성)
+    var osmStandard = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    });
+    var esriSat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Tiles &copy; Esri"
+    });
     
-    /*********************
-     * 지도 생성 (기존)
-     *********************/
+    // 지도 생성 (초기 중심은 한국성서대학교)
     var map = L.map("map", {
       center: [37.648694, 127.064194],
       zoom: 16,
@@ -290,103 +341,7 @@
     });
     osmStandard.addTo(map);
     
-    // 기본 마커 재추가: 한국성서대학교 (아이콘 정의 이후에 추가하도록 함)
-    
-    /*********************
-     * 지도 스타일 전환 컨트롤 (하단 우측)
-     *********************/
-    var baseLayers = {
-      "일반 지도": osmStandard,
-      "위성 지도": esriSat
-    };
-    L.control.layers(baseLayers, null, { position: "bottomright" }).addTo(map);
-    
-    /*********************
-     * 축척 컨트롤 (좌측 하단, 기존 디자인 그대로 + ft / m 칸 분리)
-     *********************/
-    L.control.scale({ position: "bottomleft" }).addTo(map);
-    
-    /*********************
-     * 외부 흰 배경 마스크 (유지)
-     *********************/
-    var masks = [
-      [[-90, -180], [90, 124]],
-      [[-90, 132], [90, 180]],
-      [[39.5, 124], [90, 132]],
-      [[-90, 124], [33.0, 132]]
-    ];
-    masks.forEach(function (b) {
-      L.rectangle(b, {
-        color: "white",
-        weight: 0,
-        fillOpacity: 1,
-        interactive: false
-      }).addTo(map);
-    });
-    
-    /*********************
-     * 커스텀 줌 슬라이더 (우측 상단, top:50px)
-     *********************/
-    var ZoomSliderV = L.Control.extend({
-      options: { position: "topright" },
-      onAdd: function () {
-        var ctr = L.DomUtil.create("div", "zoom-slider-vertical");
-        var iv = Math.round(
-          ((map.getZoom() - map.getMinZoom()) / (map.getMaxZoom() - map.getMinZoom())) *
-          (30 / 5)
-        ) * 5;
-        ctr.innerHTML =
-          '<input type="range" id="zoom-range-v" min="0" max="30" step="5" value="' +
-          iv +
-          '">' +
-          '<span id="zoom-value-v">' + iv + "</span>" +
-          '<div class="slider-buttons"><button id="zoom-increase">+</button><button id="zoom-decrease">-</button></div>';
-        L.DomEvent.disableClickPropagation(ctr);
-        return ctr;
-      }
-    });
-    map.addControl(new ZoomSliderV());
-    
-    /*********************
-     * 슬라이더 이벤트 (유지)
-     *********************/
-    function sliderToZoom(v) {
-      var ratio = v / 30;
-      map.setZoom(map.getMinZoom() + ratio * (map.getMaxZoom() - map.getMinZoom()));
-    }
-    var slider = document.getElementById("zoom-range-v"),
-        display = document.getElementById("zoom-value-v");
-    slider.addEventListener("input", function () {
-      display.textContent = this.value;
-      sliderToZoom(+this.value);
-    });
-    map.on("zoomend", function () {
-      var v = Math.round(
-        ((map.getZoom() - map.getMinZoom()) / (map.getMaxZoom() - map.getMinZoom())) *
-        (30 / 5)
-      ) * 5;
-      slider.value = v;
-      display.textContent = v;
-      if (map.getZoom() < 14) map.closePopup();
-    });
-    document.addEventListener("click", function (e) {
-      if (e.target.id === "zoom-increase") {
-        var v = Math.min(30, +slider.value + 5);
-        slider.value = v;
-        display.textContent = v;
-        sliderToZoom(v);
-      }
-      if (e.target.id === "zoom-decrease") {
-        var v = Math.max(0, +slider.value - 5);
-        slider.value = v;
-        display.textContent = v;
-        sliderToZoom(v);
-      }
-    });
-    
-    /*********************
-     * 아이콘 정의 (유지) - 기본 마커 아이콘 등은 아래에 정의
-     *********************/
+    // 아이콘 정의 (기본 마커 아이콘)
     var blueIcon = new L.Icon({
       iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
       shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
@@ -404,160 +359,75 @@
       shadowSize: [41, 41]
     });
     
-    /*********************
-     * 기본 마커 재추가: 한국성서대학교 (페이지 진입 시)
-     *********************/
-    L.marker([37.648694, 127.064194], { icon: blueIcon })
+    // 기본 마커: 한국성서대학교 (페이지 진입 시)
+    var homeMarker = L.marker([37.648694, 127.064194], { icon: blueIcon })
       .addTo(map)
       .bindPopup("<strong>한국성서대학교</strong>")
-      .openPopup();
+      homeMarker.openPopup(); // 페이지 진입 시 팝업 열기
     
-    /*********************
-     * 한식 가게 데이터
-     *********************/
-    var koreanShops = [
-      {
-        coords: [37.648558864743464, 127.06203685094735],
-        name: "영성식당 (한식)",
-        img: "C:/Users/CDW/HTML_Webclass/media/영성식당.jpg",
-        partner: true,
-        info: "테이블 당 캔 음료 1개 or 계란찜 제공",
-        location: "서울 용산구", 
-        phone: "02-931-0001",
-        hours: "10:00~22:00"
-      },
-      {
-        coords: [37.650746083563845, 127.06188002539936],
-        name: "국수나무 (한식)",
-        img: "C:/Users/CDW/HTML_Webclass/media/국수나무.jpg",
-        partner: false,
-        location: "서울 용산구",
-        phone: "정보 없음",
-        hours: "정보 없음"
-      },
-      {
-        coords: [37.650218765642684, 127.06234135464992],
-        name: "국시집 (한식)",
-        img: "C:/Users/CDW/HTML_Webclass/media/국시집.jpg",
-        partner: true,
-        info: "닭, 멸치 국시, 냉모밀 1.5배 제공",
-        location: "서울 용산구",
-        phone: "정보 없음",
-        hours: "정보 없음"
-      }
+    // 지도 스타일 전환 컨트롤 (하단 우측, resetView 버튼과 겹치지 않도록 margin-bottom 추가됨)
+    var baseLayers = {
+      "일반 지도": osmStandard,
+      "위성 지도": esriSat
+    };
+    L.control.layers(baseLayers, null, { position: "bottomright" }).addTo(map);
+    
+    // 축척 컨트롤 (좌측 하단, ft와 m 분리)
+    L.control.scale({ position: "bottomleft" }).addTo(map);
+    
+    // 외부 흰 배경 마스크
+    var masks = [
+      [[-90, -180], [90, 124]],
+      [[-90, 132], [90, 180]],
+      [[39.5, 124], [90, 132]],
+      [[-90, 124], [33.0, 132]]
     ];
+    masks.forEach(function(b) {
+      L.rectangle(b, {
+        color: "white",
+        weight: 0,
+        fillOpacity: 1,
+        interactive: false
+      }).addTo(map);
+    });
+function sliderToZoom(sliderValue) {
+    return 6 + (sliderValue / 30) * 12;
+  }
+  function zoomToSlider(zoom) {
+    return Math.round(((zoom - 6) / 12 * 30) / 5) * 5;
+  }
+
+  document.getElementById("zoom-range-v").addEventListener("input", function() {
+    var zoom = sliderToZoom(+this.value);
+    map.setZoom(zoom);
+    document.getElementById("zoom-value-v").textContent = this.value;
+  });
+  map.on("zoomend", function() {
+    var slider = document.getElementById("zoom-range-v");
+    var display = document.getElementById("zoom-value-v");
+    var sliderValue = zoomToSlider(map.getZoom());
+    slider.value = sliderValue;
+    display.textContent = sliderValue;
+  });
+  document.getElementById("zoom-increase").addEventListener("click", function() {
+    var slider = document.getElementById("zoom-range-v");
+    var v = Math.min(+slider.max, +slider.value + 5);
+    slider.value = v;
+    map.setZoom(sliderToZoom(v));
+    document.getElementById("zoom-value-v").textContent = v;
+  });
+  document.getElementById("zoom-decrease").addEventListener("click", function() {
+    var slider = document.getElementById("zoom-range-v");
+    var v = Math.max(+slider.min, +slider.value - 5);
+    slider.value = v;
+    map.setZoom(sliderToZoom(v));
+    document.getElementById("zoom-value-v").textContent = v;
+  });
     
-    /*********************
-     * 중식 가게 데이터 (총 10개)
-     *********************/
-    var chineseShops = [
-      {
-        coords: [37.6479919478235, 127.062242496877],
-        name: "슈엔차이",
-        img: "https://via.placeholder.com/120?text=슈엔차이",
-        partner: true,
-        info: "브레이크 15:00~16:30",
-        location: "서울 노원구 상계동 763-4",
-        phone: "02-933-3345",
-        hours: "11:00~21:00"
-      },
-      {
-        coords: [37.649408246899, 127.062330705355],
-        name: "금화 반점",
-        img: "https://via.placeholder.com/120?text=금화반점",
-        partner: false,
-        location: "서울 노원구 상계동 749-7",
-        phone: "정보 없음",
-        hours: "11:30~21:00"
-      },
-      {
-        coords: [37.6498808620377, 127.062236934343],
-        name: "중식당규규",
-        img: "https://via.placeholder.com/120?text=규규",
-        partner: true,
-        info: "브레이크 16:00~17:00, 라스트 21:20",
-        location: "서울 노원구 동일로 1356 상가동2층 212호",
-        phone: "0507-1349-8336",
-        hours: "11:00~22:00"
-      },
-      {
-        coords: [37.65675199926709, 127.06446603030311],
-        name: "설화",
-        img: "https://via.placeholder.com/120?text=설화",
-        partner: true,
-        info: "브레이크 15:00~17:00, 라스트 21:30",
-        location: "서울 노원구 상계로5길 12 동양상가 2층 (202-1호)",
-        phone: "02-933-4485",
-        hours: "11:30~22:00"
-      },
-      {
-        coords: [37.6544548276974, 127.062677840248],
-        name: "홍콩반점0410 노원역남부",
-        img: "https://via.placeholder.com/120?text=홍콩반점",
-        partner: false,
-        info: "",
-        location: "서울 노원구 노해로 502 (상계동) 2층 (KT노원지사)",
-        phone: "정보 없음",
-        hours: "11:00~21:30 (라스트 21:00)"
-      },
-      {
-        coords: [37.6544548276974, 127.062677840248],
-        name: "가양 훠궈 샤브샤브",
-        img: "https://via.placeholder.com/120?text=가양훠궈",
-        partner: false,
-        info: "무한리필",
-        location: "서울 노원구 노해로 492 2층 203호",
-        phone: "정보 없음",
-        hours: "11:00~22:00"
-      },
-      {
-        coords: [37.6551188125687, 127.063089199491],
-        name: "탕화쿵푸마라탕 노원역점",
-        img: "https://via.placeholder.com/120?text=탕화쿵푸",
-        partner: false,
-        info: "매주 화요일 휴무",
-        location: "서울 노원구 노해로 495 202호",
-        phone: "정보 없음",
-        hours: "11:00~21:00"
-      },
-      {
-        coords: [37.6557918268818, 127.062277905261],
-        name: "신미방 마라탕 노원점",
-        img: "https://via.placeholder.com/120?text=신미방마라탕",
-        partner: false,
-        info: "",
-        location: "서울 노원구 상계로 64 1층 2호",
-        phone: "070-7576-1883",
-        hours: "10:40~22:40"
-      },
-      {
-        coords: [37.6559815855142, 127.064601468448],
-        name: "청도양꼬치 노원점",
-        img: "https://via.placeholder.com/120?text=청도양꼬치",
-        partner: false,
-        info: "",
-        location: "서울 노원구 노해로83길 18-6 2층",
-        phone: "0507-1376-2242",
-        hours: "15:00~04:00"
-      },
-      {
-        coords: [37.6563543249568, 127.062249590194],
-        name: "춘리마라탕 노원점",
-        img: "https://via.placeholder.com/120?text=춘리마라탕",
-        partner: false,
-        info: "",
-        location: "서울 노원구 상계로 65",
-        phone: "02-933-2156",
-        hours: "10:30~22:00"
-      }
-    ];
-    
-    /*********************
-     * Feature 7: 즐겨찾기 토글 및 공유 기능
-     *********************/
+    // 즐겨찾기 기능
     function toggleFavorite(shopName) {
       var index = favorites.indexOf(shopName);
-      if (index === -1) {
+      if(index === -1) {
         favorites.push(shopName);
         alert(shopName + "이(가) 즐겨찾기에 추가되었습니다.");
       } else {
@@ -570,40 +440,30 @@
       var shareUrl = "https://example.com/?shop=" + encodeURIComponent(shopName);
       alert("공유할 URL: " + shareUrl);
     }
-    
-    /*********************
-     * 즐겨찾기 패널 UI 업데이트 함수
-     *********************/
     function updateFavoritesPanel() {
       var favoritesList = document.getElementById("favorites-list");
-      if (favorites.length === 0) {
+      if(favorites.length === 0) {
         favoritesList.innerHTML = "<p>즐겨찾기가 비어있습니다.</p>";
       } else {
         favoritesList.innerHTML = "";
-        // 한식과 중식 데이터 합쳐서 favorites에 포함된 항목을 찾음
-        var combinedShops = koreanShops.concat(chineseShops);
+        var combinedShops = koreanShops.concat(chineseShops, japaneseShops);
         combinedShops.forEach(function(shop) {
-          if (favorites.indexOf(shop.name) !== -1) {
+          if(favorites.indexOf(shop.name) !== -1) {
             var item = document.createElement("div");
             item.className = "favorite-item";
-            item.innerHTML =
-              "<strong>" + shop.name + "</strong>" +
-              "<div class='info'>위치: " + shop.location + "</div>" +
-              "<div class='info'>전화번호: " + (shop.phone || "정보 없음") + "</div>" +
-              "<div class='info'>이용시간: " + shop.hours + "</div>" +
-              "<button onclick=\"toggleFavorite('" + shop.name + "')\">삭제</button>";
+            item.innerHTML = "<strong>" + shop.name + "</strong>" +
+                             "<div class='info'>위치: " + shop.location + "</div>" +
+                             "<div class='info'>전화번호: " + (shop.phone || "정보 없음") + "</div>" +
+                             "<div class='info'>이용시간: " + shop.hours + "</div>" +
+                             "<button onclick=\"toggleFavorite('" + shop.name + "')\">삭제</button>";
             favoritesList.appendChild(item);
           }
         });
       }
     }
-    
-    /*********************
-     * 즐겨찾기 패널 토글 버튼 이벤트 (별 아이콘 버튼)
-     *********************/
     document.getElementById("toggleFavorites").addEventListener("click", function() {
       var panel = document.getElementById("favorites-panel");
-      if (panel.style.display === "none" || panel.style.display === "") {
+      if(panel.style.display === "none" || panel.style.display === "") {
         panel.style.display = "block";
         updateFavoritesPanel();
       } else {
@@ -611,28 +471,374 @@
       }
     });
     
+    // 원래 위치 복귀 버튼 이벤트 (우측 하단)
+document.getElementById("resetView").addEventListener("click", function() {
+  map.setView([37.648694, 127.064194], 16);
+  setTimeout(function() {
+    homeMarker.openPopup();
+  }, 200); // 200ms 지연 후 팝업 오픈
+});
+    
+    // 마커 클러스터링 및 카테고리별 가게 표시 함수
+function showCategory(list) {
+  if(markerClusterGroup) { map.removeLayer(markerClusterGroup); }
+  markerClusterGroup = L.markerClusterGroup();
+  current = [];
+  list.forEach(function(s) {
+    var icon = s.partner ? yellowIcon : blueIcon;
+var popup = '<div style="text-align:center;">' +
+              '<div style="font-weight:bold; margin-bottom:4px;">' + s.name + '</div>' +
+              '<img src="' + s.img + '" style="width:120px; border-radius:8px; cursor:pointer;" onclick="map.closePopup()"/>' +
+              (s.info ? '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#2196F3; border:none; border-radius:4px; cursor:pointer;" onclick="alert(\''+s.info+'\')">제휴정보</button>' : "") +
+              '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#FF5722; border:none; border-radius:4px; cursor:pointer;" onclick="toggleFavorite(\''+s.name+'\')">즐겨찾기</button>' +
+            "</div>";
+    var m = L.marker(s.coords, { icon: icon })
+             .bindPopup(popup, { autoClose: true, closeOnClick: true, offset: L.point(0,0) });
+    markerClusterGroup.addLayer(m);
+    current.push(m);
+  });
+  map.addLayer(markerClusterGroup);
+}
+    
+    // 한식, 중식, 일식 데이터 및 버튼 이벤트
+    var koreanShops = [
+      {
+        coords: [37.6499047712494, 127.061313311302],
+        name: "신화쭈꾸미",
+        img: "C:/Users/CDW/HTML_Webclass/media/영성식당.jpg",
+        partner: true,
+        info: "1인당 1000원 할인 (철판요리)",
+        location: "서울 노원구 상계동 746-5",
+        phone: "0507-1438-8956",
+        hours: "매일 11:30 - 23:00 (21:30 라스트오더)"
+      },
+      {
+        coords: [37.6531812103228, 127.058625072693],
+        name: "예향정 노원점",
+        img: "https://via.placeholder.com/120?text=예향정",
+        partner: false,
+        info: "",
+        location: "서울 노원구 상계동 735-4",
+        phone: "0507-1436-9998",
+        hours: "평일 10:30 - 21:10 (브레이크타임 15:30-17:00, 라스트오더 20:40), 토 10:30 - 21:00 (라스트오더 20:30), 일 11:00 - 21:00 (라스트오더 20:30)"
+      },
+      {
+        coords: [37.6556023679915, 127.065082545269],
+        name: "빽돈 노원점",
+        img: "https://via.placeholder.com/120?text=빽돈노원점",
+        partner: false,
+        info: "",
+        location: "서울 노원구 상계동 323-29",
+        phone: "0507-1491-1311",
+        hours: "월~토 11:30-23:00, 일 12:30-22:00"
+      },
+      {
+        coords: [37.6566468253976, 127.063019549815],
+        name: "쭈꾸미달인 노원점",
+        img: "https://via.placeholder.com/120?text=쭈꾸미달인",
+        partner: false,
+        info: "",
+        location: "서울 노원구 상계동 595",
+        phone: "0507-1358-3912",
+        hours: "월~목 14:30-22:30, 금~일 12:00-23:00"
+      },
+      {
+        coords: [37.6563995709767, 127.062217896578],
+        name: "고기싸롱 노원역점",
+        img: "https://via.placeholder.com/120?text=고기싸롱",
+        partner: false,
+        info: "",
+        location: "서울 노원구 상계동 602-3",
+        phone: "02-933-6329",
+        hours: "매일 11:00-23:00 (라스트오더 21:40)"
+      },
+      {
+        coords: [37.6552277602079, 127.06355754897],
+        name: "샐러디 노원역점",
+        img: "https://via.placeholder.com/120?text=샐러디",
+        partner: true,
+        info: "매장 이용시 10% 할인",
+        location: "서울 노원구 상계동 717-1",
+        phone: "0507-1362-3286",
+        hours: "매일 10:00-21:00"
+      },
+      {
+        coords: [37.6499764090371, 127.069118959728],
+        name: "열정국밥 노원구중계점",
+        img: "https://via.placeholder.com/120?text=열정국밥",
+        partner: false,
+        info: "",
+        location: "서울특별시 노원구 덕릉로71길 5 상가동 1층 103, 104호(중계동, 성원아파트)",
+        phone: "050-8818-62868",
+        hours: "월/목/금/토 06:00-02:55, 화 06:00-20:55, 수 08:00-21:55, 일 06:00-22:30"
+      },
+      {
+        coords: [37.653381980665, 127.059640820591],
+        name: "신의 한국수 노원점",
+        img: "https://via.placeholder.com/120?text=신의한국수",
+        partner: false,
+        info: "",
+        location: "서울특별시 노원구 동일로217가길 13 1층(상계동, 광일빌딩)",
+        phone: "050-3622-57807",
+        hours: "매일 07:30-22:40"
+      },
+      {
+        coords: [37.6557918268818, 127.062277905261],
+        name: "미아리우동집 노원점",
+        img: "https://via.placeholder.com/120?text=미아리우동집",
+        partner: false,
+        info: "",
+        location: "서울특별시 노원구 상계로 64 화랑빌딩 1층 7호(상계동)",
+        phone: "050-8819-46907",
+        hours: "평일/토 08:00-02:00, 일 10:00-21:30 (브레이크타임 15:50-17:00)"
+      },
+      {
+        coords: [37.6554668710187, 127.070549223719],
+        name: "오빠네 제육",
+        img: "https://via.placeholder.com/120?text=오빠네제육",
+        partner: false,
+        info: "",
+        location: "서울특별시 노원구 상계로12길 68 1층 102호(상계동)",
+        phone: "050-8819-15110",
+        hours: "월/화/목/금/토/일 09:00-01:30, 수 09:00-22:00, 토 09:00-23:30"
+      },
+    ];
+    
+  var chineseShops = [
+  {
+    coords: [37.6479919478235, 127.062242496877],
+    name: "슈엔차이",
+    img: "https://via.placeholder.com/120?text=슈엔차이",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계동 763-4",
+    phone: "02-933-3345",
+    hours: "11:00~21:00 (브레이크타임 15:00~16:30)"
+  },
+  {
+    coords: [37.649408246899, 127.062330705355],
+    name: "금화 반점",
+    img: "https://via.placeholder.com/120?text=금화반점",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계동 749-7",
+    phone: "",
+    hours: "11:30~21:00"
+  },
+  {
+    coords: [37.6498808620377, 127.062236934343],
+    name: "중식당규규",
+    img: "https://via.placeholder.com/120?text=규규",
+    partner: false,
+    info: "",
+    location: "서울 노원구 동일로 1356 상가동2층 212호",
+    phone: "0507-1349-8336",
+    hours: "11:00~22:00 (브레이크타임 16:00~17:00, 라스트오더 21:20)"
+  },
+  {
+    coords: [37.6544548276974, 127.062677840248],
+    name: "가양 훠궈 샤브샤브",
+    img: "https://via.placeholder.com/120?text=가양훠궈",
+    partner: false,
+    info: "",
+    location: "서울 노원구 노해로 492 2층 203호",
+    phone: "",
+    hours: "11:00~22:00"
+  },
+  {
+    coords: [37.6551188125687, 127.063089199491],
+    name: "탕화쿵푸마라탕 노원역점",
+    img: "https://via.placeholder.com/120?text=탕화쿵푸",
+    partner: false,
+    info: "",
+    location: "서울 노원구 노해로 495 202호",
+    phone: "",
+    hours: "11:00~21:00 (매주 화요일 휴무)"
+  },
+  {
+    coords: [37.6557918268818, 127.062277905261],
+    name: "신미방 마라탕 노원점",
+    img: "https://via.placeholder.com/120?text=신미방마라탕",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로 64 1층 2호",
+    phone: "070-7576-1883",
+    hours: "10:40~22:40"
+  },
+  {
+    coords: [37.6559815855142, 127.064601468448],
+    name: "청도양꼬치 노원점",
+    img: "https://via.placeholder.com/120?text=청도양꼬치",
+    partner: false,
+    info: "",
+    location: "서울 노원구 노해로83길 18-6 2층",
+    phone: "0507-1376-2242",
+    hours: "15:00~04:00"
+  },
+  {
+    coords: [37.6563543249568, 127.062249590194],
+    name: "춘리마라탕 노원점",
+    img: "https://via.placeholder.com/120?text=춘리마라탕",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로 65",
+    phone: "02-933-2156",
+    hours: "10:30~22:00"
+  },
+  {
+    coords: [37.6572141183604, 127.062275580083],
+    name: "헌경양꼬치",
+    img: "https://via.placeholder.com/120?text=헌경양꼬치",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로3길 21 202호",
+    phone: "0507-1305-9815",
+    hours: "12:00~01:00"
+  },
+  {
+    coords: [37.6567065402567, 127.062549747122],
+    name: "훠궈나라 노원점",
+    img: "https://via.placeholder.com/120?text=훠궈나라",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로3길 10 1층",
+    phone: "0507-1462-8253",
+    hours: "11:30~22:30 (라스트오더 21:00)"
+  },
+  {
+    coords: [37.6506100117206, 127.061234228831],
+    name: "라사천마라탕 노원점",
+    img: "https://via.placeholder.com/120?text=라사천마라탕",
+    partner: false,
+    info: "",
+    location: "서울 노원구 동일로 1365 지하1층 113호",
+    phone: "070-4915-0010",
+    hours: "16:00~02:00"
+  }
+];
+var japaneseShops = [
+  {
+    coords: [37.648494374797, 127.061997930473],
+    name: "노원돈부리",
+    img: "https://via.placeholder.com/120?text=노원돈부리",
+    partner: false,
+    info: "",
+    location: "서울 노원구 동일로 1343 동일프라자빌딩",
+    phone: "02-937-1295",
+    hours: "11:30 ~ 17:00 / 일요일,월요일 휴무"
+  },
+  {
+    coords: [37.650122369351855, 127.06146590136503],
+    name: "수유리우동집 상계백병원점",
+    img: "https://via.placeholder.com/120?text=수유리우동집",
+    partner: true,
+    info: "우동면, 잔치면 곱빼기 제공 (1인당 면류 하나 이상 주문)",
+    location: "서울 노원구 동일로 1361 주공 2단지 상가 113호",
+    phone: "02-930-9485",
+    hours: "10:30 ~ 22:00 / 일요일 휴무"
+  },
+  {
+    coords: [37.64974810982212, 127.06213699191336],
+    name: "밀알생돈까스",
+    img: "https://via.placeholder.com/120?text=밀알생돈까스",
+    partner: true,
+    info: "8500원 이상 결제시 500원 할인",
+    location: "서울 노원구 동일로 1356 상가동 213호",
+    phone: "0507-1401-5430",
+    hours: "11:00 ~ 20:30 / 일요일 휴무"
+  },
+  {
+    coords: [37.6573394320599, 127.062129151875],
+    name: "마카나이 노원점",
+    img: "https://via.placeholder.com/120?text=마카나이",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로1길 14-29 1층",
+    phone: "0507-1465-5032",
+    hours: "11:00 ~ 21:00 / 일요일 휴무"
+  },
+  {
+    coords: [37.65134980418283, 127.06176154168143],
+    name: "스시웨이 노원점",
+    img: "https://via.placeholder.com/120?text=스시웨이",
+    partner: false,
+    info: "",
+    location: "서울 노원구 동일로 1374 미산빌딩 2층",
+    phone: "0507-1410-3774",
+    hours: "11:30 ~ 22:00 (15:00 ~ 17:00 브레이크 타임) / 일요일 휴무"
+  },
+  {
+    coords: [37.65419837690444, 127.06324276673256],
+    name: "홋코리동",
+    img: "https://via.placeholder.com/120?text=홋코리동",
+    partner: false,
+    info: "",
+    location: "서울 노원구 동일로218길 41 1층 103호",
+    phone: "0507-1380-2140",
+    hours: "11:00 ~ 21:00 / 일요일 휴무"
+  },
+  {
+    coords: [37.6564745272749, 127.067943554213],
+    name: "카레후카미&수제카츠 노원점",
+    img: "https://via.placeholder.com/120?text=카레후카미",
+    partner: false,
+    info: "",
+    location: "서울 노원구 상계로10길 23 1층",
+    phone: "0507-1313-2269",
+    hours: "11:00 ~ 21:00"
+  },
+  {
+    coords: [37.6589435497049, 127.06462658759054],
+    name: "수시로 스시",
+    img: "https://via.placeholder.com/120?text=수시로스시",
+    partner: false,
+    info: "",
+    location: "서울 노원구 노원로 479 1층",
+    phone: "02-932-0725",
+    hours: "11:30 ~ 22:00 (15:00 ~ 16:30 브레이크타임)"
+  },
+  {
+    coords: [37.6467905319279, 127.070940893709],
+    name: "스시고칸 중계점",
+    img: "https://via.placeholder.com/120?text=스시고칸",
+    partner: false,
+    info: "",
+    location: "서울 노원구 노원로 330 지하1층",
+    phone: "0507-1310-7930",
+    hours: "11:00 ~ 21:00 (매달 2, 4번째 일요일 휴무)"
+  },
+  {
+    coords: [37.650813215261486, 127.07784090734175],
+    name: "스시소리",
+    img: "https://via.placeholder.com/120?text=스시소리",
+    partner: false,
+    info: "",
+    location: "서울 노원구 중계로 202 1층",
+    phone: "0507-1337-7794",
+    hours: "11:00 ~ 21:30"
+  }
+];
+    
     /*********************
-     * Feature 5 & 7: 마커 클러스터링 및 즐겨찾기/공유 버튼 포함하여 맛집 표시
+     * 마커 클러스터링 및 카테고리별 가게 표시 함수
      *********************/
     function showCategory(list) {
-      if (markerClusterGroup) {
-        map.removeLayer(markerClusterGroup);
+      if(markerClusterGroup) { 
+        map.removeLayer(markerClusterGroup); 
       }
       markerClusterGroup = L.markerClusterGroup();
       current = [];
       list.forEach(function(s) {
         var icon = s.partner ? yellowIcon : blueIcon;
-        var popup =
-          '<div style="text-align:center;">' +
-            '<div style="font-weight:bold; margin-bottom:4px;">' + s.name + '</div>' +
-            '<img src="' + s.img + '" style="width:120px; border-radius:8px; cursor:pointer;" onclick="map.closePopup()" />' +
-            (s.info ? '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#2196F3; border:none; border-radius:4px; cursor:pointer;" onclick="alert(\'' + s.info + '\')">제휴정보</button>' : "") +
-            '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#FF5722; border:none; border-radius:4px; cursor:pointer;" onclick="toggleFavorite(\'' + s.name + '\')">즐겨찾기</button>' +
-            '<button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#009688; border:none; border-radius:4px; cursor:pointer; margin-left:4px;" onclick="shareShop(\'' + s.name + '\')">공유</button>' +
-          "</div>";
+        var popup = '<div style="text-align:center;">' +
+                    '<div style="font-weight:bold; margin-bottom:4px;">' + s.name + '</div>' +
+                    '<img src="' + s.img + '" style="width:120px; border-radius:8px; cursor:pointer;" onclick="map.closePopup()"/>' +
+                    (s.info ? '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#2196F3; border:none; border-radius:4px; cursor:pointer;" onclick="alert(\''+s.info+'\')">제휴정보</button>' : "") +
+                    '<br/><button style="margin-top:6px; padding:4px 8px; font-size:0.8rem; color:#fff; background:#FF5722; border:none; border-radius:4px; cursor:pointer;" onclick="toggleFavorite(\''+s.name+'\')">즐겨찾기</button>' +
+                    "</div>";
         var m = L.marker(s.coords, { icon: icon })
-          .bindPopup(popup, { autoClose: false, closeOnClick: false, offset: L.point(0, 0) });
-        m.openPopup();  // 마커 생성 시 팝업 자동 오픈
+                 .bindPopup(popup, { autoClose: false, closeOnClick: false, offset: L.point(0,0) });
+        m.openPopup();
         markerClusterGroup.addLayer(m);
         current.push(m);
       });
@@ -641,11 +847,16 @@
     
     /*********************
      * 카테고리 버튼 이벤트
-     * - 한식: koreanShops, 중식: chineseShops, 일식: 빈 배열(추후 추가 가능)
      *********************/
-    document.getElementById("btn-korean").addEventListener("click", () => showCategory(koreanShops));
-    document.getElementById("btn-chinese").addEventListener("click", () => showCategory(chineseShops));
-    document.getElementById("btn-japanese").addEventListener("click", () => showCategory([]));
+    document.getElementById("btn-korean").addEventListener("click", function() {
+      showCategory(koreanShops);
+    });
+    document.getElementById("btn-chinese").addEventListener("click", function() {
+      showCategory(chineseShops);
+    });
+    document.getElementById("btn-japanese").addEventListener("click", function() {
+      showCategory(japaneseShops); // 일식은 예시로 하나만 표시
+    });
   </script>
 </body>
 </html>

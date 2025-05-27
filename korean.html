@@ -2,107 +2,200 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>한식 맛집 리스트</title>
-  <link rel="stylesheet" href="style.css">
+  <title>한식 가게 리스트</title>
   <style>
-    body {
-      background: linear-gradient(to bottom, #fff8f0, #f9e9d2);
-      font-family: 'Noto Sans KR', sans-serif;
-      color: #3e2723;
-    }
-
-    header {
-      background-color: #8e4b10;
+    .banner {
+      background-color: #6ecf6d;
       color: white;
       text-align: center;
-      padding: 2rem;
-      border-bottom: 4px solid #6d3309;
+      padding: 40px;
+      font-size: 30px;
+      font-weight: bold;
     }
 
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      opacity: 0.9;
-    }
-
-    .restaurant-container {
+    .shop-button {
       display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      padding: 2rem;
-      gap: 2rem;
-    }
-
-    .restaurant-card {
-      background-color: #ffffff;
+      align-items: center;
+      width: 90%;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #f8f8f8;
+      border: 2px solid #ddd;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 260px;
-      padding: 1.5rem;
-      text-align: center;
       cursor: pointer;
-      transition: transform 0.2s ease;
-      border: 2px solid #d8b78a;
+      transition: 0.3s;
+      text-align: left;
     }
 
-    .restaurant-card:hover {
-      transform: scale(1.03);
-      background-color: #fff5e0;
+    .shop-button:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .restaurant-card h2 {
-      font-size: 1.6rem;
-      color: #8e4b10;
-      margin-bottom: 0.5rem;
+    .shop-image {
+      width: 100px;
+      height: 100px;
+      background-color: #eee;
+      border-radius: 8px;
+      margin-right: 20px;
+      flex-shrink: 0;
     }
 
-    .restaurant-card p {
-      font-size: 1rem;
-      color: #5e4534;
+    .shop-info {
+      flex-grow: 1;
     }
 
-    footer {
-      text-align: center;
-      padding: 2rem;
-      background-color: #f5f5f5;
+    .shop-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    a {
-      text-decoration: none;
-      color: #8e4b10;
+    .shop-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .shop-hours {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    .shop-menu {
+      font-size: 14px;
+      color: #444;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>한식 맛집 리스트</h1>
-    <p>노원구의 인기 한식 맛집을 소개합니다</p>
-  </header>
 
-  <main>
-    <div class="restaurant-container">
-      <div class="restaurant-card" onclick="location.href='restaurant_guksijip.html'">
-        <h2>국시집</h2>
-        <p>상계동의 국수 전문점, 시장풍경 내 위치</p>
-      </div>
-      <div class="restaurant-card" onclick="location.href='restaurant_yeongseong.html'">
-        <h2>영성식당</h2>
-        <p>다양한 한식 메뉴를 제공하는 상계동의 맛집</p>
-      </div>
-      <div class="restaurant-card" onclick="location.href='restaurant_guksunamu.html'">
-        <h2>국수나무</h2>
-        <p>다양한 국수와 돈까스를 즐길 수 있는 체인점</p>
-      </div>
+  <div class="banner">한식 가게 리스트</div>
+
+ <!-- ...existing code... -->
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/신화쭈꾸미.jpg" alt="신화쭈꾸미" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
     </div>
-  </main>
+    <div class="shop-info">
+      <div class="shop-name">신화쭈꾸미</div>
+      <div class="shop-desc">매콤한 쭈꾸미와 다양한 철판요리, 1인당 천원 할인(제휴)</div>
+      <div class="shop-hours">운영시간: 매일 11:30 ~ 23:00 (21:30 라스트오더)</div>
+      <div class="shop-menu">대표 메뉴: 신화쭈꾸미, 쭈꾸미삼겹살, 바다쭈꾸미, 신화쭈꾸미모듬</div>
+    </div>
+  </div>
 
-  <footer>
-    <a href="index.html">← 메인으로 돌아가기</a>
-  </footer>
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/예향정.jpg" alt="예향정 노원점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">예향정 노원점</div>
+      <div class="shop-desc">다양한 직화요리와 넓은 좌석, 가족 외식에 추천</div>
+      <div class="shop-hours">운영시간: 월~금 10:30~21:10 (15:30~17:00 브레이크타임, 20:40 라스트오더), 토 10:30~21:00, 일 11:00~21:00</div>
+      <div class="shop-menu">대표 메뉴: 직화두루치기, 직화소불고기, 치즈두루치기</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/빽돈.jpg" alt="빽돈 노원점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">빽돈 노원점</div>
+      <div class="shop-desc">숙성 삼겹살과 목살이 인기인 고기집</div>
+      <div class="shop-hours">운영시간: 월~토 11:30~23:00, 일 12:30~22:00</div>
+      <div class="shop-menu">대표 메뉴: 숙성삼겹, 숙성목살</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/쭈꾸미달인.jpg" alt="쭈꾸미달인 노원점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">쭈꾸미달인 노원점</div>
+      <div class="shop-desc">쭈꾸미와 볶음밥이 맛있는 한식 전문점</div>
+      <div class="shop-hours">운영시간: 월~목 14:30~22:30, 금~일 12:00~23:00</div>
+      <div class="shop-menu">대표 메뉴: 쭈꾸미삼겹살, 날치알볶음밥</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/고기싸롱.jpg" alt="고기싸롱 노원역점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">고기싸롱 노원역점</div>
+      <div class="shop-desc">숯불향 가득한 닭갈비와 돼지갈비 전문</div>
+      <div class="shop-hours">운영시간: 매일 11:00~23:00 (21:40 라스트오더)</div>
+      <div class="shop-menu">대표 메뉴: 숯불닭갈비, 돼지갈비</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/샐러디.jpg" alt="샐러디 노원역점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">샐러디 노원역점</div>
+      <div class="shop-desc">신선한 샐러드와 다양한 한식 누들볼, 매장 이용시 10% 할인(제휴)</div>
+      <div class="shop-hours">운영시간: 매일 10:00~21:00</div>
+      <div class="shop-menu">대표 메뉴: 우삼겹메밀면 누들볼, 칠리베이컨 포케볼, 멕시칸 랩 샌드위치</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/열정국밥.jpg" alt="열정국밥 노원구중계점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">열정국밥 노원구중계점</div>
+      <div class="shop-desc">진한 국물의 국밥과 해장국 전문점</div>
+      <div class="shop-hours">운영시간: 월,목,금,토 06:00~02:55, 화 06:00~20:55, 수 08:00~21:55, 일 06:00~22:30</div>
+      <div class="shop-menu">대표 메뉴: 돼지국밥, 토종순대국밥, 얼큰열정해장국</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/신의한국수.jpg" alt="신의한국수 노원점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">신의한국수 노원점</div>
+      <div class="shop-desc">정성 가득한 국수와 김밥 전문점</div>
+      <div class="shop-hours">운영시간: 매일 07:30~22:40</div>
+      <div class="shop-menu">대표 메뉴: 야채김밥, 잔치국수, 비빔국수</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/미아리우동집.jpg" alt="미아리우동집 노원점" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">미아리우동집 노원점</div>
+      <div class="shop-desc">정겨운 분위기의 우동, 김밥, 비빔밥 전문</div>
+      <div class="shop-hours">운영시간: 평일/토 08:00~02:00, 일 10:00~21:30 (브레이크타임 15:50~17:00)</div>
+      <div class="shop-menu">대표 메뉴: 참치김밥, 미아리김밥, 비빔밥</div>
+    </div>
+  </div>
+
+  <div class="shop-button">
+    <div class="shop-image">
+      <img src="media/한식 간판/오빠네제육.png" alt="오빠네 제육" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+    </div>
+    <div class="shop-info">
+      <div class="shop-name">오빠네 제육</div>
+      <div class="shop-desc">직화 고추장 제육과 다양한 한식 세트 메뉴</div>
+      <div class="shop-hours">운영시간: 월,화,목,금,일 09:00~01:30, 수 09:00~22:00, 토 09:00~23:30</div>
+      <div class="shop-menu">대표 메뉴: 직화 고추장 제육 비빔밥, 고기 찌개세트, 비빔국수 세트</div>
+    </div>
+  </div>
+
+<!-- ...existing code... -->
+
 </body>
 </html>
